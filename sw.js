@@ -1,4 +1,4 @@
-const CACHE_NAME = 'asset-participations-v1';
+const CACHE_NAME = 'asset-participations-v8';
 const ASSETS = [
   './',
   './index.html',
