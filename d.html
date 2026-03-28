@@ -6,7 +6,9 @@
 <title>Asset Participations</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="theme-color" content="#0a0f14">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -94,7 +96,7 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;letter-
 .color-swatch:hover{transform:scale(1.15);border-color:var(--heading)}
 .on-edit{background:transparent;border:1px solid var(--bar-text-color);color:var(--bar-text-color);font-family:inherit;font-size:11px;font-weight:700;padding:1px 4px;border-radius:3px;width:80px;text-align:center}
 .on-edit:focus{outline:none}
-.color-dot{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.4);cursor:pointer;transition:all .15s;flex-shrink:0;display:inline-block}
+.color-dot{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.4);cursor:pointer;transition:all .15s;flex-shrink:0;position:absolute;bottom:4px;right:4px;z-index:2}
 .color-dot:hover{transform:scale(1.3);border-color:rgba(255,255,255,.8)}
 .sticky-top{position:sticky;top:0;z-index:50;background:var(--bg);padding-bottom:6px}
 .delta-pos{color:var(--pos)}.delta-neg{color:var(--neg)}.delta-zero{color:var(--text-faint)}
@@ -160,6 +162,7 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;letter-
   .ico-btn{width:28px;height:28px;border-radius:5px}
   .ico-btn svg{width:12px;height:12px}
   .unified-bar{padding:8px 10px;margin-bottom:10px}
+  .unified-track{height:auto!important;min-height:65px;max-height:156px}
   .unified-seg .u-pct{font-size:18px}
   .unified-seg .u-val{font-size:10px}
   .unified-seg .u-lbl{font-size:9px}
@@ -178,7 +181,7 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;letter-
   .owner-pill{border-radius:4px}
   .adj-btn{width:20px;height:20px;font-size:13px}
   .owner-chip{min-width:38px;font-size:10px;padding:2px 3px}
-  .bar-seg{height:11px;font-size:0}
+  .bar-seg{height:30px!important;font-size:10px!important}
   .bar-labels{flex-wrap:nowrap;gap:4px}
   .bar-label{font-size:10px}
   .row-num{min-width:14px;font-size:10px}
@@ -190,8 +193,10 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;letter-
   .tab-total{font-size:11px}
   .name-input{width:90px;font-size:11px}
   .check-box{width:14px;height:14px}
+  .color-dot{width:18px;height:18px;bottom:3px;right:3px}
 }
 @media(max-width:480px){
+  .unified-track{max-height:130px}
   .unified-seg .u-pct{font-size:15px}
   .unified-seg .u-val{font-size:9px}
   .tab-btn{padding:5px 8px;font-size:9px}
@@ -199,7 +204,7 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;letter-
   .row-name{max-width:70px;font-size:10px}
   .owner-chip{min-width:34px;font-size:9px}
   .adj-btn{width:18px;height:18px;font-size:12px}
-  .bar-seg{height:10px;font-size:0}
+  .bar-seg{height:26px!important;font-size:9px!important}
 }
 </style>
 </head>
@@ -284,10 +289,38 @@ function doSaveHTML(ro,pw){
   f=f.replace(/\/\*__TABNAMES_START__\*\/.*?\/\*__TABNAMES_END__\*\//,"/*__TABNAMES_START__*/var INIT_TABNAMES="+ts+";/*__TABNAMES_END__*/");
   f=f.replace(/\/\*__RENAMED_START__\*\/.*?\/\*__RENAMED_END__\*\//,"/*__RENAMED_START__*/var INIT_RENAMED="+rs+";/*__RENAMED_END__*/");
   f=f.replace(/\/\*__PASSWORD_START__\*\/.*?\/\*__PASSWORD_END__\*\//,"/*__PASSWORD_START__*/var INIT_PWD="+(pw?"\""+pw.replace(/\\/g,"\\\\").replace(/"/g,'\\"')+"\"":"null")+";/*__PASSWORD_END__*/");
-  var b=new Blob(["<!DOCTYPE html>\n<html"+f.slice(f.indexOf("<html")+5)],{type:"text/html"}),u=URL.createObjectURL(b),l=document.createElement("a"),n=new Date();
-  var st=n.getFullYear()+("0"+(n.getMonth()+1)).slice(-2)+("0"+n.getDate()).slice(-2)+"_"+("0"+n.getHours()).slice(-2)+("0"+n.getMinutes()).slice(-2);
-  l.href=u;l.download="asset_participations_"+(ro?"readonly":"editable")+"_"+st+".html";document.body.appendChild(l);l.click();document.body.removeChild(l);URL.revokeObjectURL(u);
-  sSnap=P(sc);sTSnap=P(tn);dirty=Array(5).fill(false);sF("Saved as "+(ro?"read-only":"editable")+" HTML"+(pw?" (password protected)":""));R();
+  var content="<!DOCTYPE html>\n<html"+f.slice(f.indexOf("<html")+5);
+  var n=new Date(),st=n.getFullYear()+("0"+(n.getMonth()+1)).slice(-2)+("0"+n.getDate()).slice(-2)+"_"+("0"+n.getHours()).slice(-2)+("0"+n.getMinutes()).slice(-2);
+  var fname="asset_participations_"+(ro?"readonly":"editable")+"_"+st+".html";
+  // Use File System Access API if available (Chrome/Edge desktop — prompts save location)
+  if(window.showSaveFilePicker){
+    window.showSaveFilePicker({suggestedName:fname,types:[{description:"HTML File",accept:{"text/html":[".html"]}}]}).then(function(handle){
+      return handle.createWritable().then(function(wr){return wr.write(content).then(function(){return wr.close()})});
+    }).then(function(){
+      sSnap=P(sc);sTSnap=P(tn);dirty=Array(5).fill(false);sF("Saved as "+(ro?"read-only":"editable")+" HTML"+(pw?" (🔒)":""));R();
+    }).catch(function(e){if(e.name!=="AbortError")fallbackSave(content,fname,ro,pw)});
+  }else{
+    fallbackSave(content,fname,ro,pw);
+  }
+}
+function fallbackSave(content,fname,ro,pw){
+  var b=new Blob([content],{type:"text/html"});
+  var file=new File([b],fname,{type:"text/html"});
+  // On mobile (iOS/Android): use share sheet → Save to Files / iCloud
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file],title:"Asset Participations"}).then(function(){
+      sSnap=P(sc);sTSnap=P(tn);dirty=Array(5).fill(false);sF("Shared/saved "+(ro?"read-only":"editable")+(pw?" (🔒)":""));R();
+    }).catch(function(e){
+      if(e.name!=="AbortError"){dlSave(b,fname,ro,pw)}
+    });
+  }else{
+    dlSave(b,fname,ro,pw);
+  }
+}
+function dlSave(b,fname,ro,pw){
+  var u=URL.createObjectURL(b),l=document.createElement("a");
+  l.href=u;l.download=fname;document.body.appendChild(l);l.click();document.body.removeChild(l);URL.revokeObjectURL(u);
+  sSnap=P(sc);sTSnap=P(tn);dirty=Array(5).fill(false);sF("Saved as "+(ro?"read-only":"editable")+(pw?" (🔒)":""));R();
 }
 
 function getMajOwner(x){
@@ -546,20 +579,19 @@ function R(){
     var isMob='ontouchstart' in window;
     h+='<div class="unified-seg" data-card-owner="'+o+'" style="width:'+w+'%;background:var(--'+k+'-bar);position:relative" ondragover="oCDO(event,\''+o+'\')" ondragleave="oCDL(event)" ondrop="oCDR(event,\''+o+'\')" '+(isMob?'onclick="sortByOwner(\''+o+'\')"':'ondblclick="sortByOwner(\''+o+'\')"')+'>';
     if(w>18){
-      // Top row: color dot + owner name
-      h+='<div style="display:flex;align-items:center;gap:4px">';
-      h+='<div class="color-dot" style="background:var(--'+k+'-bar);border-color:rgba(255,255,255,.4)" onclick="toggleCP(event,\''+o+'\')"></div>';
+      // Owner name
       if(editOwnerName===o){
         h+='<input id="on-input" class="on-edit" value="'+ownerNames[o].replace(/"/g,"&quot;")+'" onclick="event.stopPropagation()" ondblclick="event.stopPropagation()" onblur="commitOwnerName(this.value)" onkeydown="if(event.key===\'Enter\')commitOwnerName(this.value);if(event.key===\'Escape\')cancelOwnerName()">';
       }else{
         h+='<span class="u-lbl" onclick="event.stopPropagation();startOwnerNameEdit(\''+o+'\')" ondblclick="event.stopPropagation();startOwnerNameEdit(\''+o+'\')">'+ownerNames[o]+'</span>';
       }
-      h+='</div>';
       h+='<span class="u-pct">'+t[o].pct+'%</span>';
       h+='<span class="u-val">'+fv(t[o].v)+'</span>';
+      h+='<div class="color-dot" style="background:var(--'+k+'-bar)" onclick="toggleCP(event,\''+o+'\')"></div>';
     }else if(w>10){
-      h+='<div style="display:flex;align-items:center;gap:3px"><div class="color-dot" style="background:var(--'+k+'-bar)" onclick="toggleCP(event,\''+o+'\')"></div><span class="u-lbl">'+o+'</span></div>';
+      h+='<span class="u-lbl">'+o+'</span>';
       h+='<span class="u-pct" style="font-size:18px">'+t[o].pct+'%</span>';
+      h+='<div class="color-dot" style="background:var(--'+k+'-bar)" onclick="toggleCP(event,\''+o+'\')"></div>';
     }else if(w>4){
       h+='<span class="u-pct" style="font-size:14px">'+t[o].pct+'%</span>';
     }
